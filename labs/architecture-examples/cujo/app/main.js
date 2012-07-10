@@ -89,7 +89,7 @@ define({
 	// data storage.
 	todoStore: {
 		create: {
-			module: 'controls/filterAdapter',
+			module: 'cola/adapter/filterAdapter',
 			args: {
 				// The actual storage adapter is a LocalStorage adapter
 				// but it is being wrapped in a filtering adapter.

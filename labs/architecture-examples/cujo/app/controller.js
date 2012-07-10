@@ -28,6 +28,12 @@ define(function () {
 		 */
 		updateTodo: function(todo) {},
 
+		handleFilter: function(filter) {
+			this.toggleFilterState.remove(this.querySelector('.selected'));
+			this.toggleFilterState.add(this.querySelector('[href="#' + filter + '"]'));
+			return filter;
+		},
+
 		/**
 		 * Start inline editing a todo
 		 * @param node {Node} Dom node of the todo

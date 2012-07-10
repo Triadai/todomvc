@@ -65,20 +65,9 @@ define({
 		insert: { after: 'root' }
 	},
 
-	// Create a localStorage adapter that will use the storage
-	// key 'todos-cujo' for storing todos.  This is also linked,
-	// creating a two-way linkage between the listView and the
-	// data storage.
-	todoStore: {
-		create: {
-			module: 'cola/adapter/LocalStorage',
-			args: 'todos-cujo'
-		},
-		bind: {
-			to: { $ref: 'todos' }
-		}
-	},
-
+	// Create a cola Hub that manages data synchronization between
+	// multiple data adapters--in this case between a the todoStore
+	// and the listView, both of which are linked to this Hub.
 	todos: {
 		create: {
 			module: 'cola/Hub',
@@ -91,6 +80,43 @@ define({
 		before: {
 			add: 'cleanTodo | generateMetadata',
 			update: 'cleanTodo'
+		}
+	},
+
+	// Create a localStorage adapter that will use the storage
+	// key 'todos-cujo' for storing todos.  This is also linked,
+	// creating a two-way linkage between the listView and the
+	// data storage.
+	todoStore: {
+		create: {
+			module: 'controls/filterAdapter',
+			args: {
+				// The actual storage adapter is a LocalStorage adapter
+				// but it is being wrapped in a filtering adapter.
+				create: {
+					module: 'cola/adapter/LocalStorage',
+					args: 'todos-cujo'
+				}
+			}
+		},
+		bind: {
+			to: { $ref: 'todos' }
+		},
+		connect: {
+			'todoController.handleFilter': 'routeToFilter | filter'
+		}
+	},
+
+	// Transform a route into a filter to be applied to the todos
+	routeToFilter: {
+		create: {
+			module: 'controls/routeToFilter',
+			args: [
+				{
+					'/active': { complete: false },
+					'/completed': { complete: true }
+				}
+			]
 		}
 	},
 
@@ -110,9 +136,14 @@ define({
 
 			querySelector: { $ref: 'dom.first!' },
 
+			toggleFilterState: { $ref: 'toggleFilterState' },
+
 			masterCheckbox: { $ref: 'dom.first!#toggle-all', at: 'listView' },
 			countNode: { $ref: 'dom.first!.count', at: 'controlsView' },
 			remainingNodes: { $ref: 'dom.all!#todo-count strong', at: 'controlsView' }
+		},
+		routes: {
+			'^\\/(active|completed)?$': 'handleFilter'
 		},
 		on: {
 			createView: {
@@ -152,6 +183,15 @@ define({
 		}
 	},
 
+	toggleFilterState: {
+		create: {
+			module: 'wire/dom/transform/toggleClasses',
+			args: {
+				classes: 'selected'
+			}
+		}
+	},
+
 	setTodosTotalState: {
 		create: {
 			module: 'wire/dom/transform/cardinality',
@@ -174,7 +214,7 @@ define({
 	},
 
 	plugins: [
-//		{ module: 'wire/debug', trace: true },
+		{ module: 'controls/routing' },
 		{ module: 'wire/dom' },
 		{ module: 'wire/dom/render' },
 		{ module: 'wire/on' },

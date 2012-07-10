@@ -1,4 +1,9 @@
-define(['when', 'cola/enqueue'], function(when, enqueue) {
+define(function(require) {
+
+	var when, enqueue;
+
+	when = require('when');
+	enqueue = require('../enqueue');
 
 	return function filteredAdapter(adapter) {
 

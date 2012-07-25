@@ -31,55 +31,45 @@
 		<div class="row">
 			<div class="span4">
 				<h2>Introduction</h2>
-				<p>Developers these days are spoiled with choice when it comes to selecting an <strong>MV* framework</strong> for structuring and organizing JavaScript web apps.</p>
-				<p>Backbone, Ember, AngularJS, Spine... the list of new and stable solutions goes on and on, but just how do you decide on which to use in a sea of so many options?</p>
+				<p>Developers these days are spoiled with choice when it comes to selecting an <strong>MV* framework</strong> for structuring and organizing their JavaScript web apps.</p>
+				<p>Backbone, Ember, AngularJS, Spine... the list of new and stable solutions continues to grow, but just how do you decide on which to use in a sea of so many options?</p>
 				<p>To help solve this problem, we created <a href="https://github.com/addyosmani/todomvc">TodoMVC</a> - a project which offers the same Todo application implemented using MV* concepts in most of the popular JavaScript MV* frameworks of today.</p>
 			</div>
 			<div class="span8">
 				<h2>Our Stable Apps</h2>
 				<ul class="applist">
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/backbone/" data-source="http://documentcloud.github.com/backbone/" data-content="Backbone.js gives structure to web applications by providing models with key-value binding and custom events, collections with a rich API of enumerable functions, views with declarative event handling, and connects it all to your existing API over a RESTful JSON interface.">Backbone.js</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/emberjs/" data-source="http://emberjs.com" data-content="Ember is a JavaScript framework for creating ambitious web applications that eliminates boilerplate and provides a standard application architecture.">Ember.js</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a class="routing" href="architecture-examples/angularjs/" data-source="http://angularjs.org" data-content="What HTML would have been had it been designed for web apps">AngularJS</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/spine/" data-source="http://spinejs.com" data-content="Spine is a lightweight framework for building JavaScript web applications. Spine gives you an MVC structure and then gets out of your way, allowing you to concentrate on the fun stuff, building awesome web applications.">Spine</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/knockoutjs/" data-source="http://knockoutjs.com" data-content="Simplify dynamic JavaScript UIs by applying the Model-View-View Model (MVVM) pattern">KnockoutJS</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/dojo/" data-source="http://dojotoolkit.org" data-content="Dojo saves you time and scales with your development process, using web standards as its platform. It’s the toolkit experienced developers turn to for building high quality desktop and mobile web applications.">Dojo</a>
-						<span class="label">R</span>
 					</li>
-					<li>
-						<a href="architecture-examples/yuilibrary/" data-source="http://yuilibrary.com" data-content="YUI's lightweight core and modular architecture make it scalable, fast, and robust. Built by frontend engineers at Yahoo!, YUI powers the most popular websites in the world.">YUI</a>
+					<li data-routing>
+						<a href="architecture-examples/yui/" data-source="http://yuilibrary.com" data-content="YUI's lightweight core and modular architecture make it scalable, fast, and robust. Built by frontend engineers at Yahoo!, YUI powers the most popular websites in the world.">YUI</a>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="labs/architecture-examples/batman/" data-source="http://batmanjs.org" data-content="Batman.js is a framework for building rich web applications with CoffeeScript or JavaScript. App code is concise and declarative, thanks to a powerful system of view bindings and observable properties. The API is designed with developer and designer happiness as its first priority.">Batman.js</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/closure/" data-source="http://code.google.com/closure/library/" data-content="The Closure Library is a broad, well-tested, modular, and cross-browser JavaScript library. You can pull just what you need from a large set of reusable UI widgets and controls, and from lower-level utilities for DOM manipulation, server communication, animation, data structures, unit testing, rich-text editing, and more.">Closure</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/agilityjs/" data-source="http://agilityjs.com" data-content="Agility.js is an MVC library for Javascript that lets you write maintainable and reusable browser code without the infrastructural overhead found in other MVC libraries. The goal is to enable developers to write web apps at least as quickly as with jQuery, while simplifying long-term maintainability through MVC objects.">Agility.js</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="architecture-examples/knockback/" data-source="http://kmalakoff.github.com/knockback/" data-content="Knockback.js provides Knockout.js magic for Backbone.js Models and Collections.">Knockback.js</a>
-						<span class="label">R</span>
 					</li>
 					<li>
 						<a href="architecture-examples/gwt/" data-source="https://developers.google.com/web-toolkit/" data-content="Google Web Toolkit (GWT) is an MVP development toolkit for building and optimizing complex browser-based applications. GWT is used by many products at Google, including Google AdWords.">GWT</a>
@@ -88,13 +78,11 @@
 				<hr>
 				<h2>Apps using RequireJS/AMD</h2>
 				<ul class="applist amd">
-					<li>
+					<li data-routing>
 						<a href="dependency-examples/backbone_require/" data-source="http://requirejs.org" data-content="RequireJS is a JavaScript file and module loader. It is optimized for in-browser use, but it can be used in other JavaScript environments, like Rhino and Node. Using a modular script loader like RequireJS will improve the speed and quality of your code.">Backbone.js + RequireJS</a>
-						<span class="label">R</span>
 					</li>
-					<li>
+					<li data-routing>
 						<a href="dependency-examples/emberjs_require/" data-source="http://emberjs.com" data-content="Ember is a JavaScript framework for creating ambitious web applications that eliminates boilerplate and provides a standard application architecture. This is an example of using it with AMD modules">Ember.js + RequireJS</a>
-						<span class="label">R</span>
 					</li>
 				</ul>
 				<h2>Compare these to a non-framework implementation</h2>
@@ -116,32 +104,33 @@
 		<hr>
 		<div class="row">
 			<div class="span6">
-				<img class="screenshot" src="site/img/screenshot.png" width="558" height="246" alt="Todo app screenshot">
-				<p class="tagline2">TodoMVC is a common learning application for popular JavaScript MV* frameworks</p>
+				<h2>Thoughts on the project</h2>
+				<blockquote class="quote speech-bubble">
+					<p></p>
+					<footer>
+						<img width="40" height="40" alt="">
+						<a></a>
+					</footer>
+				</blockquote>
 			</div>
 			<div class="span6">
-				<h2>Title</h2>
-				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-				tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-				quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-				cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-				proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				<img class="screenshot" src="site/img/screenshot.png" width="558" height="246" alt="Todo app screenshot">
 			</div>
 		</div>
 		<hr>
 		<div class="row">
-			<div class="span4">
-				<h2>Thoughts on the project</h2>
-				<blockquote class="quote speech-bubble">
-					<p>Modern JavaScript developers realise an MVC framework is essential for managing the complexity of their apps. TodoMVC is a fabulous community contribution that helps developers compare frameworks on the basis of actual project code, not just claims and anecdotes.</p>
-					<footer>
-						<img src="http://gravatar.com/avatar/cabf735ce7b8b4471ef46ea54f71832d?s=40" width="40" height="40" alt="Michael Mahemoff">
-						<a href="https://github.com/mahemoff">Michael Mahemoff</a>
-					</footer>
-				</blockquote>
+			<div class="span3">
+				<h2>What's new in 1.0</h2>
+				<ul>
+					<li>All main apps have been completely rewritten for consistency</li>
+					<li>Routing has been added to many of these</li>
+					<li>We now have 30 apps being worked on in Labs</li>
+					<li>We're using a kick-ass new template</li>
+					<li>Framework authors and contributors have been consulted to ensure our apps adhere to best practices</li>
+					<li>We're helping AMD users by adding AMD versions of many apps</li>
+				</ul>
 			</div>
-			<div class="span4">
+			<div class="span5">
 				<h2>Selecting a Framework</h2>
 				<p>Once you've downloaded the latest release and played around with the apps, you'll want to decide on a specific framework to try out.</p>
 				<p>Study the syntax required for defining models, views and (where applicable) controllers and classes in the frameworks you're interested in and try your hand at editing the code to see how it feels using it first-hand.</p>
@@ -161,7 +150,7 @@
 		<div class="row">
 			<div class="span12">
 				<h2>Labs</h2>
-				<ul class="applist labs">
+				<ul class="applist">
 					<li>
 						<a href="labs/architecture-examples/maria/src/" data-source="https://github.com/petermichaux/maria" data-content="An MVC framework for JavaScript applications. The real MVC. The Smalltalk MVC. The Gang of Four MVC. The three core design patterns of MVC (observer, composite, and strategy) are embedded in Maria's Model, View, and Controller objects. Other patterns traditionally included in MVC implementations (e.g. factory method and template) make appearances too.">Maria</a>
 					</li>

@@ -52,6 +52,7 @@ We also have a number of in-progress applications in Labs:
 - [Sammy.js](http://sammyjs.org)
 - [JavaScriptMVC](http://javascriptmvc.com)
 - [Stapes.js](http://hay.github.com/stapes)
+- [Epitome](http://dimitarchristoff.github.com/Epitome)
 - [TroopJS](https://github.com/troopjs)
 - [soma.js](http://somajs.github.com/somajs)
 - [DUEL](https://bitbucket.org/mckamey/duel/wiki/Home)
@@ -92,10 +93,6 @@ Addy is a Developer Platform Engineer at Google who originally created TodoMVC. 
 <img align="left" width="40" height="40" src="http://www.gravatar.com/avatar/d36a92237c75c5337c17b60d90686bf9.png?s=40">
 Sindre is a Web Developer who drives core development, quality control and application design for the project. His contributions have helped us ensure consistency and best practices are enforced wherever possible.
 
-#### [Aaron Boushley](https://github.com/boushley) - on leave
-
-Aaron is a JavaScript developer with a keen interest in architectural frameworks and has helped both standardize existing examples and improve the project as we worked on expansion. He is currently taking a break from his open-source contributions at this time.
-
 #### [Gianni Chiappetta](http://gitub.com/gf3) - Logo designer
 
 
@@ -108,7 +105,7 @@ It is meant to be used as a gateway to reviewing how a basic application using a
 
 ## Project Status
 
-TodoMVC is currently preparing applications for the next major release of the project due out in early July. This will include re-writes of almost all applications, ensuring they follow a consistent set of specifications and are using the latest versions of all libraries and frameworks in use. We will also be addressing framework author concerns about routing by adding this to some of the more mainstream applications in the project.
+TodoMVC 1.0 was just released and includes re-writes of almost all applications, ensuring they follow a consistent set of specifications and are using the latest versions of all libraries and frameworks in use. We've also addressed framework author concerns about routing by adding this to many of the more mainstream applications in the project.
 
 
 ## Getting Involved

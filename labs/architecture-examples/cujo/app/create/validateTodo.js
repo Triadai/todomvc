@@ -1,7 +1,11 @@
 define(function() {
 
 	/**
-	 * Validate a todo
+	 * Validates a todo.  A valid todo must have a non-empty text field
+	 * @param todo {Object} todo object
+	 * @return {Object} validation result that has a boolean valid field
+	 * indicating whether the todo is valid or not, and an errors array that
+	 * contains a list of validation errors if the todo is not valid.
 	 */
 	return function validateTodo(todo) {
 		var valid, result;

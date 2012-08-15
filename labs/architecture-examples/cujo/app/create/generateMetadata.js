@@ -4,6 +4,9 @@ define(function() {
 	 * Since we're using a datastore (localStorage) that doesn't generate ids and such
 	 * for us, this transform generates a GUID id and a dateCreated.  It can be
 	 * injected into a pipeline for creating new todos.
+	 * @param item {Object} data item to which a GUID-lik id and dateCreated fields
+	 *  will be added
+	 * @return {Object} item, with id an dateCreated fields added
 	 */
 	return function generateMetadata(item) {
 		item.id = guidLike();

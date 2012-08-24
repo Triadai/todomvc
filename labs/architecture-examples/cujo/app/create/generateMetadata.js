@@ -1,3 +1,4 @@
+(function(define) {
 define(function() {
 
 	/**
@@ -26,3 +27,7 @@ define(function() {
 	}
 
 });
+})(typeof define == 'function'
+	? define
+	: function(factory) { module.exports = factory(); }
+);

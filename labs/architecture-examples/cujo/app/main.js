@@ -69,11 +69,25 @@ define({
 	// key 'todos-cujo' for storing todos.  This is also linked,
 	// creating a two-way linkage between the listView and the
 	// data storage.
+//	todoStore: {
+//		create: {
+//			module: 'cola/adapter/LocalStorage',
+//			args: 'todos-cujo'
+//		},
+//		bind: {
+//			to: { $ref: 'todos' }
+//		}
+//	},
+
+	// cola will automatically wrap this in an Array adapter when
+	// it encounters the "bind" facet.  The data will be transient--if you
+	// reload the page, it'll reset to the array below, but otherwise will
+	// work exactly like using any other supported cola data source.
 	todoStore: {
-		create: {
-			module: 'cola/adapter/LocalStorage',
-			args: 'todos-cujo'
-		},
+		literal: [
+			{ id: 1, text: 'Create a cola array binding demo', complete: true },
+			{ id: 2, text: 'Create a cola form-object binding demo', complete: false }
+		],
 		bind: {
 			to: { $ref: 'todos' }
 		}

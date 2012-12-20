@@ -8,7 +8,7 @@
 (function(define){
 define(['when'], function(when) {
 
-	"use strict";
+	'use strict';
 
 	function Resolver(config) {
 		this._resolvers = config.resolvers;
@@ -41,7 +41,7 @@ define(['when'], function(when) {
 				resolve: function() {
 					return self._resolve(resolver, name, options);
 				}
-			}
+			};
 		},
 
 		_resolve: function(resolverName, name, options) {
@@ -55,11 +55,11 @@ define(['when'], function(when) {
 				if (resolver) {
 					resolver(deferred.resolver, name, options||{}, this._pluginApi);
 				} else {
-					deferred.reject("No resolver plugin found: " + resolverName);
+					deferred.reject('No resolver plugin found: ' + resolverName);
 				}
 
 			} else {
-				deferred.reject("Cannot resolve ref: " + name);
+				deferred.reject('Cannot resolve ref: ' + name);
 			}
 
 			return deferred.promise;

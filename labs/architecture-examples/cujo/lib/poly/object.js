@@ -24,17 +24,11 @@
  *
  * true: fail on every shimmed Object function
  * false: fail never
- * RegExp: fail for shims whose name matches the RegExp
- * string: string is converted to a RegExp
  * function: fail for shims whose name returns true from function (name) {}
  *
- * By default, failIfShimmed fails for the following functions:
- * defineProperty
- * defineProperties
- * preventExtensions
- * getOwnPropertyDescriptor
+ * By default, no shims fail.
  *
- * The following functions don't fail by default because they're safely shimmed:
+ * The following functions are safely shimmed:
  * create (unless the second parameter is specified since that calls defineProperties)
  * keys
  * getOwnPropertyNames
@@ -52,6 +46,12 @@
  * Note: this shim doesn't do anything special with IE8's minimally useful
  * Object.defineProperty(domNode).
  *
+ * The poly/strict module will set failIfShimmed to fail for some shims.
+ * See the documentation for more information.
+ *
+ * IE missing enum properties fixes copied from kangax:
+ * https://github.com/kangax/protolicious/blob/master/experimental/object.for_in.js
+ *
  */
 define(['./lib/_base'], function (base) {
 "use strict";
@@ -59,9 +59,9 @@ define(['./lib/_base'], function (base) {
 	var refObj,
 		refProto,
 		getPrototypeOf,
+		keys,
 		featureMap,
 		shims,
-		failTestRx,
 		undef;
 
 	refObj = Object;
@@ -70,6 +70,18 @@ define(['./lib/_base'], function (base) {
 	getPrototypeOf = typeof {}.__proto__ == 'object'
 		? function (object) { return object.__proto__; }
 		: function (object) { return object.constructor ? object.constructor.prototype : refProto; };
+
+	keys = !hasNonEnumerableProps
+		? _keys
+		: (function (masked) {
+			return function (object) {
+				var result = _keys(object), i = 0, m;
+				while (m = masked[i++]) {
+					if (hasProp(object, m)) result.push(m);
+				}
+				return result;
+			}
+		}([ 'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'toLocaleString', 'valueOf' ]));
 
 	featureMap = {
 		'object-create': 'create',
@@ -89,10 +101,9 @@ define(['./lib/_base'], function (base) {
 
 	shims = {};
 
-	failTestRx = /^define|^prevent|descriptor$/i;
-
-	function regexpShouldThrow (feature) {
-		return failTestRx.test(feature);
+	function hasNonEnumerableProps () {
+		for (var p in { toString: 1 }) return false;
+		return true;
 	}
 
 	function createFlameThrower (feature) {
@@ -113,7 +124,7 @@ define(['./lib/_base'], function (base) {
 		return object.hasOwnProperty(name);
 	}
 
-	function keys (object) {
+	function _keys (object) {
 		var result = [];
 		for (var p in object) {
 			if (hasProp(object, p)) {
@@ -126,18 +137,18 @@ define(['./lib/_base'], function (base) {
 	if (!has('object-create')) {
 		Object.create = shims.create = function create (proto, props) {
 			var obj;
-			if (proto) {
-				PolyBase.prototype = proto;
-				obj = new PolyBase(props);
-				PolyBase.prototype = null;
-			}
-			else {
-				obj = {};
-			}
+
+			if (typeof proto != 'object') throw new TypeError('prototype is not of type Object or Null.');
+
+			PolyBase.prototype = proto;
+			obj = new PolyBase(props);
+			PolyBase.prototype = null;
+
 			if (arguments.length > 1) {
 				// defineProperties could throw depending on `shouldThrow`
 				Object.defineProperties(obj, props);
 			}
+
 			return obj;
 		};
 	}
@@ -201,15 +212,16 @@ define(['./lib/_base'], function (base) {
 	if (!has('object-isextensible')) {
 		Object.isExtensible = shims.isExtensible = function isExtensible (object) {
 			var prop = '_poly_';
-			// create unique property name
-			while (prop in object) prop += '_';
-			// try to set it
 			try {
+				// create unique property name
+				while (prop in object) prop += '_';
+				// try to set it
 				object[prop] = 1;
 				return hasProp(object, prop);
 			}
+			catch (ex) { return false; }
 			finally {
-				delete object[prop];
+				try { delete object[prop]; } catch (ex) { /* squelch */ }
 			}
 		};
 	}
@@ -236,15 +248,7 @@ define(['./lib/_base'], function (base) {
 	function failIfShimmed (failTest) {
 		var shouldThrow;
 
-		// first convert failTest to a function
-		if (typeof failTest == 'string' || failTest instanceof String) {
-			failTest = new RegExp(failTest, 'i');
-		}
-		if (failTest instanceof RegExp) {
-			failTestRx = failTest;
-			shouldThrow = regexpShouldThrow;
-		}
-		else if (typeof failTest == 'function') {
+		if (typeof failTest == 'function') {
 			shouldThrow = failTest;
 		}
 		else {
@@ -260,7 +264,8 @@ define(['./lib/_base'], function (base) {
 		}
 	}
 
-	failIfShimmed(regexpShouldThrow);
+	// this is effectively a no-op, so why execute it?
+	//failIfShimmed(false);
 
 	return {
 		failIfShimmed: failIfShimmed

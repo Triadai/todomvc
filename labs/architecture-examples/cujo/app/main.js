@@ -81,7 +81,7 @@ define({
 
 	todos: {
 		create: {
-			module: 'cola/Hub',
+			module: 'cola/Collection',
 			args: {
 				strategyOptions: {
 					validator: { module: 'create/validateTodo' }
@@ -104,7 +104,7 @@ define({
 		properties: {
 			todos: { $ref: 'todos' },
 
-			createTodo: { compose: 'parseForm | todos.add' },
+			createTodo: { compose: 'form.getValues | todos.add' },
 			removeTodo: { compose: 'todos.remove' },
 			updateTodo: { compose: 'todos.update' },
 
@@ -139,7 +139,7 @@ define({
 		}
 	},
 
-	parseForm: { module: 'cola/dom/formToObject' },
+	form: { module: 'cola/dom/form' },
 	cleanTodo: { module: 'create/cleanTodo' },
 	generateMetadata: { module: 'create/generateMetadata' },
 
@@ -174,7 +174,7 @@ define({
 	},
 
 	plugins: [
-//		{ module: 'wire/debug', trace: true },
+		{ module: 'wire/debug', trace: true },
 		{ module: 'wire/dom' },
 		{ module: 'wire/dom/render' },
 		{ module: 'wire/on' },

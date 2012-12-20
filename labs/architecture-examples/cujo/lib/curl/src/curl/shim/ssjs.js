@@ -12,7 +12,7 @@
  *
  * @experimental
  */
-define.amd.ssjs = true;
+define['amd'].ssjs = true;
 var require, load;
 (function (freeRequire, globalLoad) {
 define(/*=='curl/shim/ssjs',==*/ function (require, exports) {
@@ -28,7 +28,7 @@ define(/*=='curl/shim/ssjs',==*/ function (require, exports) {
 	}
 
 	priv = require('curl/_privileged');
-	config = priv.cfg;
+	config = priv.config();
     hasProtocolRx = /^\w+:/;
 	extractProtocolRx = /(^\w+:)?.*$/;
 

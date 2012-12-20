@@ -1,49 +1,49 @@
-**NOTE: when.js's unit tests are all currently passing.**
+# when.js [![Build Status](https://secure.travis-ci.org/cujojs/when.png)](http://travis-ci.org/cujojs/when)
 
-There is a circular dependency between buster.js and when.js that is causing Travis builds to fail. To run the unit tests yourself and verify:
+When.js is cujojs's lightweight [CommonJS](http://wiki.commonjs.org/wiki/Promises) [Promises/A](http://wiki.commonjs.org/wiki/Promises/A) and `when()` implementation, derived from the async core of [wire.js](https://github.com/cujojs/wire), cujojs's IOC Container.  It also provides several other useful Promise-related concepts, such as joining multiple promises, mapping and reducing collections of promises, timed promises, and has a robust [unit test suite](#running-the-unit-tests).
 
-1. Clone the when.js repo
-1. Install buster globally to avoid circular dep: `npm install -g buster`
-1. `cd when && npm test`
-1. Remove buster globally if you want to clean up: `npm remove -g buster`
+It passes the [Promises/A Test Suite](https://github.com/domenic/promise-tests), is [frighteningly fast](https://github.com/cujojs/promise-perf-tests#test-results), and is **under 1.3k** when compiled with Google Closure (w/advanced optimizations) and gzipped, and has no dependencies.
 
-[![Build Status](https://secure.travis-ci.org/cujojs/when.png)](http://travis-ci.org/cujojs/when)
+# What's New?
 
-A lightweight [CommonJS](http://wiki.commonjs.org/wiki/Promises) [Promises/A](http://wiki.commonjs.org/wiki/Promises/A) and `when()` implementation.  It also provides several other useful Promise-related concepts, such as joining and chaining, and has a robust unit test suite.
+### 1.7.1
 
-It's **just over 1k** when compiled with Google Closure (w/advanced optimizations) and gzipped.
+* Removed leftover internal usages of `deferred.then`.
+* [when/debug](https://github.com/cujojs/when/wiki/when-debug) allows configuring the set of "fatal" error types that will be rethrown to the host env.
 
-when.js was derived from the async core of [wire.js](https://github.com/cujojs/wire).
+### 1.7.0
 
-What's New?
-===========
+* **DEPRECATED:** `deferred.then` [is deprecated](when/blob/master/docs/api.md#deferred) and will be removed in an upcoming release.  Use `deferred.promise.then` instead.
+* [promise.yield](when/blob/master/docs/api.md#yield)(promiseOrValue) convenience API for substituting a new value into a promise chain.
+* [promise.spread](when/blob/master/docs/api.md#spread)(variadicFunction) convenience API for spreading an array onto a fulfill handler that accepts variadic arguments. [Mmmm, buttery](http://s.shld.net/is/image/Sears/033W048977110001_20100422100331516?hei=1600&wid=1600&op_sharpen=1&resMode=sharp&op_usm=0.9,0.5,0,0)
+* Doc improvements:
+	* [when()](when/blob/master/docs/api.md#when) and [promise.then()](when/blob/master/docs/api.md#main-promise-api) have more info about callbacks and chaining behavior.
+	* More info and clarifications about the roles of [Deferred](when/blob/master/docs/api.md#deferred) and [Resolver](when/blob/master/docs/api.md#resolver)
+	* Several minor clarifications for various APIs
+* Internal improvements to assimilation and interoperability with other promise implementations.
 
-### 1.3.0
+### 1.6.1
 
-* `npm install when` - Yep, that's a thing.
-* Fixed a deviation from the Promises/A spec where returning undefined from a callback or errback would cause the previous value to be forwarded.  See [#31](https://github.com/cujojs/when/issues/31)
-	* *This could be a breaking change* if you depended on this behavior.  If you encounter problems, the solution is to ensure that your promise callbacks (registered either with `when()` or `.then()`) return what you intend, keeping in mind that not returning something is equivalent to returning `undefined`.
-* This change also restores compatibility with the promises returned by `jQuery.get()`, which seem to reject with themselves as the rejection value.  See [issue #41](https://github.com/cujojs/when/issues/43) for more information and discussion.  Thanks to [@KidkArolis](https://github.com/KidkArolis) for raising the issue.
+* Fix for accidental coercion of non-promises. See [#62](https://github.com/cujojs/when/issues/60).
 
-### 1.2.0
+### 1.6.0
 
-* `promise.otherwise(errback)` as a shortcut for `promise.then(null, errback)`. See discussion [here](https://github.com/cujojs/when/issues/13) and [here](https://github.com/cujojs/when/issues/29). Thanks to [@jonnyreeves](https://github.com/jonnyreeves/) for suggesting the name "otherwise".
-* [when/debug](https://github.com/cujojs/when/wiki/when-debug) now detects exceptions that typically represent coding errors, such as SyntaxError, ReferenceError, etc. and propagates them to the host environment.  In other words, you'll get a very loud stack trace.
-
-### 1.1.1
-
-* Updated [wiki](https://github.com/cujojs/when/wiki) map/reduce examples, and added simple promise forwarding example
-* Fix for calling `when.any()` without a callback ([#33](https://github.com/cujojs/when/issues/33))
-* Fix version number in `when.js` source ([#36](https://github.com/cujojs/when/issues/36))
-
-### 1.1.0
-
-* `when.all/any/some/map/reduce` can all now accept a promise for an array in addition to an actual array as input.  This allows composing functions to do interesting things like `when.reduce(when.map(...))`
-* `when.reject(promiseOrValue)` that returns a new, rejected promise.
-* `promise.always(callback)` as a shortcut for `promise.then(callback, callback)`
-* **Highly experimental** [when/debug](https://github.com/cujojs/when/wiki/when-debug) module: a drop-in replacement for the main `when` module that enables debug logging for promises created or consumed by when.js
+* New [when.join](when/blob/master/docs/api.md#whenjoin) - Joins 2 or more promises together into a single promise.
+* [when.some](when/blob/master/docs/api.md#whensome) and [when.any](when/blob/master/docs/api.md#whenany) now act like competitive races, and have generally more useful behavior.  [Read the discussion in #60](https://github.com/cujojs/when/issues/60).
+* *Experimental* progress event propagation.  Progress events will propagate through promise chains. [Read the details here](when/blob/master/docs/api.md#progress-events).
+* *Temporarily* removed calls to `Object.freeze`. Promises are no longer frozen due to a horrendous v8 performance penalty.  [Read discussion here](https://groups.google.com/d/topic/cujojs/w_olYqorbsY/discussion).
+	* **IMPORTANT:** Continue to treat promises as if they are frozen, since `freeze()` will be reintroduced once v8 performance improves.
+* [when/debug](https://github.com/cujojs/when/wiki/when-debug) now allows setting global a debugging callback for rejected promises.
 
 [Full Changelog](https://github.com/cujojs/when/wiki/Changelog)
+
+# Docs & Examples
+
+[API docs](when/blob/master/docs/api.md#api)
+
+[More info on the wiki](https://github.com/cujojs/when/wiki)
+
+[Examples](https://github.com/cujojs/when/wiki/Examples)
 
 Quick Start
 ===========
@@ -78,238 +78,21 @@ Quick Start
 1. `ringo-admin install cujojs/when`
 1. `var when = require('when');`
 
-Docs & Examples
-===============
+# Running the Unit Tests
 
-See the API section below, and the [wiki for more detailed docs](https://github.com/cujojs/when/wiki) and [examples](https://github.com/cujojs/when/wiki/Examples)
+## Node
 
-API
-===
+Note that when.js includes @domenic's [Promises/A Test Suite](https://github.com/domenic/promise-tests).  Running unit tests in Node will run both when.js's own test suite, and the Promises/A Test Suite.
 
-when()
-------
+1. `npm install`
+1. `npm test`
 
-Register a handler for a promise or immediate value:
+## Browsers
 
-```javascript
-when(promiseOrValue, callback, errback, progressback)
-
-// Always returns a promise, so can be chained:
-
-when(promiseOrValue, callback, errback, progressback).then(anotherCallback, anotherErrback, anotherProgressback)
-```
-
-**Getting an already-resolved Promise**
-
-You can also use `when()` to get an already-resolved promise for a value, similarly to using `when.reject()` to get a rejected promise (see below):
-
-```javascript
-var resolved = when(anything);
-```
-
-when.defer()
-------------
-
-Create a new Deferred containing separate `promise` and `resolver` parts:
-
-```javascript
-var deferred = when.defer();
-
-var promise = deferred.promise;
-var resolver = deferred.resolver;
-```
-
-**Promise API**
-
-```javascript
-// var promise = deferred.promise;
-
-// then()
-// Main promise API
-// Register callback, errback, and/or progressback
-promise.then(callback, errback, progressback);
-```
-
-**Extended Promise API**
-
-Convenience methods that are not part of the Promises/A proposal.
-
-```js
-// always()
-// Register an alwaysback that will be called when the promise resolves or rejects
-promise.always(alwaysback [, progressback]);
-
-// otherwise()
-// Convenience method to register only an errback
-promise.otherwise(errback);
-```
-
-**Resolver API**
-
-```javascript
-// var resolver = deferred.resolver;
-resolver.resolve(value);
-resolver.reject(err);
-resolver.progress(update);
-```
-
-The deferred has the full `promise` + `resolver` API:
-
-```javascript
-deferred.then(callback, errback, progressback);
-deferred.resolve(value);
-deferred.reject(reason);
-deferred.progress(update);
-```
-
-when.reject()
--------------
-
-```javascript
-var rejected = when.reject(anything);
-```
-
-Return a rejected promise for the supplied promiseOrValue. If promiseOrValue is a value, it will be the rejection value of the returned promise.  If promiseOrValue is a promise, its completion value will be the rejected value of the returned promise.
-
-This can be useful in situations where you need to reject a promise *without* throwing an exception.  For example, it allows you to propagate a rejection with the value of another promise.
-
-```javascript
-when(doSomething(),
-	handleSuccess,
-	function(error) {
-		// doSomething failed, but we want to do some processing on the error
-		// to return something more useful to the caller.
-		// This allows processError to return either a value or a promise.
-		return when.reject(processError(e));
-	}
-);
-```
-
-when.isPromise()
-----------------
-
-```javascript
-var is = when.isPromise(anything);
-```
-
-Return true if `anything` is truthy and implements the then() promise API.  Note that this will return true for both a deferred (i.e. `when.defer()`), and a `deferred.promise` since both implement the promise API.
-
-when.some()
------------
-
-```javascript
-when.some(promisesOrValues, howMany, callback, errback, progressback)
-```
-
-Return a promise that will resolve when `howMany` of the supplied `promisesOrValues` have resolved.  The resolution value of the returned promise will be an array of length `howMany` containing the resolutions values of the triggering `promisesOrValues`.
-
-when.all()
-----------
-
-```javascript
-when.all(promisesOrValues, callback, errback, progressback)
-```
-
-Return a promise that will resolve only once *all* the supplied `promisesOrValues` have resolved.  The resolution value of the returned promise will be an array containing the resolution values of each of the `promisesOrValues`.
-
-when.any()
-----------
-
-```javascript
-when.any(promisesOrValues, callback, errback, progressback)
-```
-
-Return a promise that will resolve when any one of the supplied `promisesOrValues` has resolved.  The resolution value of the returned promise will be the resolution value of the triggering `promiseOrValue`.
-
-when.chain()
-------------
-
-```javascript
-when.chain(promiseOrValue, resolver, optionalValue)
-```
-
-Ensure that resolution of `promiseOrValue` will complete `resolver` with the completion value of `promiseOrValue`, or instead with `optionalValue` if it is provided.
-
-Returns a new promise that will complete when `promiseOrValue` is completed, with the completion value of `promiseOrValue`, or instead with `optionalValue` if it is provided.
-
-**Note:** If `promiseOrValue` is not an immediate value, it can be anything that supports the promise API (i.e. `then()`), so you can pass a `deferred` as well.  Similarly, `resolver` can be anything that supports the resolver API (i.e. `resolve()`, `reject()`), so a `deferred` will work there, too.
-
-when.map()
-----------
-
-```javascript
-when.map(promisesOrValues, mapFunc)
-```
-
-Traditional map function, similar to `Array.prototype.map()`, but allows input to contain promises and/or values, and mapFunc may return either a value or a promise.
-
-The map function should have the signature:
-
-```javascript
-mapFunc(item)
-```
-
-Where:
-
-* `item` is a fully resolved value of a promise or value in `promisesOrValues`
-
-when.reduce()
--------------
-
-```javascript
-when.reduce(promisesOrValues, reduceFunc, initialValue)
-```
-
-Traditional reduce function, similar to `Array.prototype.reduce()`, but input may contain promises and/or values, and reduceFunc may return either a value or a promise, *and* initialValue may be a promise for the starting value.
-
-The reduce function should have the signature:
-
-```javascript
-reduceFunc(currentValue, nextItem, index, total)
-```
-
-Where:
-
-* `currentValue` is the current accumulated reduce value
-* `nextItem` is the fully resolved value of the promise or value at `index` in `promisesOrValues`
-* `index` the *basis* of `nextItem` ... practically speaking, this is the array index of the promiseOrValue corresponding to `nextItem`
-* `total` is the total number of items in `promisesOrValues`
-
-when/apply
-----------
-
-```javascript
-function functionThatAcceptsMultipleArgs(array) {
-    // ...
-}
-
-var functionThatAcceptsAnArray = apply(functionThatAcceptsMultipleArgs);
-```
-
-Helper that allows using callbacks that take multiple args, instead of an array, with `when.all/some/map`:
-
-```javascript
-when.all(arrayOfPromisesOrValues, apply(functionThatAcceptsMultipleArgs));
-```
-
-[See the wiki](https://github.com/cujojs/when/wiki/when-apply) for more info and examples.
-
-Running the Unit Tests
-======================
-
-Install [buster.js](http://busterjs.org/)
-
-`npm install -g buster`
-
-Run unit tests in Node:
-
-1. `buster test -e node`
-
-Run unit tests in Browsers (and Node):
-
-1. `buster server` - this will print a url
-2. Point browsers at <buster server url>/capture, e.g. `localhost:1111/capture`
-3. `buster test` or `buster test -e browser`
+1. `npm install`
+1. `npm start` - starts buster server & prints a url
+1. Point browsers at <buster server url>/capture, e.g. `localhost:1111/capture`
+1. `npm run-script test-browser`
 
 References
 ----------

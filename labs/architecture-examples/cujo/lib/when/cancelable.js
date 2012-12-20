@@ -36,18 +36,19 @@ define(['./when'], function(when) {
         // Add a cancel method to the deferred to reject the delegate
         // with the special canceled indicator.
         deferred.cancel = function() {
-            delegate.reject(canceler(deferred));
+            return delegate.reject(canceler(deferred));
         };
 
         // Ensure that the original resolve, reject, and progress all forward
         // to the delegate
-        deferred.then(delegate.resolve, delegate.reject, delegate.progress);
+        deferred.promise.then(delegate.resolve, delegate.reject, delegate.progress);
 
         // Replace deferred's promise with the delegate promise
         deferred.promise = delegate.promise;
 
         // Also replace deferred.then to allow it to be called safely and
         // observe the cancellation
+		// TODO: Remove once deferred.then is removed
         deferred.then = delegate.promise.then;
 
         return deferred;

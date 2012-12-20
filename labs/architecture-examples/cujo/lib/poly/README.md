@@ -1,7 +1,7 @@
 Code to modern standards. Run everywhere.
 =========
 
-version: 0.4
+version: 0.5.1
 License: MIT
 
 poly.js is the a collection of AMD modules that shim (aka "polyfill")
@@ -13,6 +13,13 @@ poly.js is unique amongst ES5-ish shims because it:
 * is tiny
 * is configurable to suit your code
 * can be minified using a has-aware optimizer
+
+Support
+---
+
+Issues: https://github.com/cujojs/poly/issues
+
+Discussion: https://groups.google.com/d/forum/cujojs
 
 Features
 ----
@@ -45,7 +52,7 @@ poly/json:
 poly/object:
 ---
 
-* Object.create,
+* Object.create *
 * Object.freeze *
 * Object.isFrozen *
 * Object.seal *
@@ -66,16 +73,12 @@ modules return a function, `failIfShimmed`, that takes a single parameter.
 This parameter may be:
 
 * a boolean (all Object.XXX functions should fail)
-* a RegExp (matches on `("object-" + methodName).toLowerCase()`)
-* a string that can be converted to a RegExp
 * a function that takes a method name as a parameter and return truthy/falsey
 
-By default, `failIfShimmed` will fail loudly for the following functions:
-
-* Object.defineProperty
-* Object.defineProperties
-* Object.preventExtensions
-* Object.getOwnPropertyDescriptor
+By default, poly/object will not throw any exceptions and allows non-functional
+or incomplete shims to fail silently.  poly/all works the same way.  However,
+poly/strict sets `failIfShimmed` so that poly/object will throw
+exceptions for some functions.  (see below)
 
 poly/string:
 ---
@@ -89,8 +92,61 @@ poly/xhr:
 
 * (global) XMLHttpRequest
 
+poly/date:
+---
+
+* Date.parse now supports simplified ISO8601 date strings
+* new Date() now supports simplified ISO8601 date strings
+* date.toISOString() returns a simplified ISO8601 date string
+
+poly/all (also just "poly"):
+---
+
+This is a *convenience module* to load and apply all shims.  Shims that have
+varying levels of "strictness" are set to be loose.  Use poly/strict or
+create your own version of poly/all to be stricter.
+
+The "poly" main module will load poly/all.
+
+poly/strict:
+---
+
+This *convenience module* loads and applies all shims, but ensures that
+whitespace characters comply with ES5 specs (many browsers don't do this)
+and fails loudly for the following object shims that can't reasonably
+be shimmed to comply with ES5:
+
+* Object.defineProperty
+* Object.defineProperties
+* Object.preventExtensions
+* Object.getOwnPropertyDescriptor
+* Object.create (but only if supplying the second parameter)
+
+If you would like your code to be even stricter, load poly/object or poly/string
+separately and set the desired level of strictness.
+
 Examples
 ==========
+
+Sample AMD package declaration:
+
+```js
+var cfg = {
+	packages: [
+		{ name: 'poly', location: 'js/poly-0.5', main: 'poly' }
+	]
+};
+```
+
+Sample AMD package declaration (strict):
+
+```js
+var cfg = {
+	packages: [
+		{ name: 'poly', location: 'js/poly-0.5', main: 'strict' }
+	]
+};
+```
 
 Using poly's modules as shims / polyfills:
 
@@ -125,6 +181,16 @@ Using poly's modules as shims / polyfills:
 ```js
 	// use all available shims
 	curl({ preloads: [ "poly/all" ] });
+```
+
+```js
+	// another way to use all available shims
+	curl({ preloads: [ "poly" ] });
+```
+
+```js
+	// use all shims in, but with stronger ES5 compliance
+	curl({ preloads: [ "poly/strict" ] });
 ```
 
 ```js

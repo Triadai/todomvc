@@ -11,11 +11,13 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 (function(define) {
-define(['aop', 'when', './lib/connection'], function(aop, when, connection) {
+define(['meld', 'when', './lib/connection'], function(meld, when, connection) {
 
 	var adviceTypes, adviceStep, undef;
 
-	adviceTypes = ['before', 'around', 'after', 'afterReturning', 'afterThrowing'];
+	// "after" is not included in these standard advice types because
+	// it is created as promise-aware advice.
+	adviceTypes = ['before', 'around', 'afterReturning', 'afterThrowing'];
 	adviceStep = 'connect:before';
 
     //
@@ -69,24 +71,24 @@ define(['aop', 'when', './lib/connection'], function(aop, when, connection) {
 
 	function makeSingleAdviceAdd(adviceType) {
 		return function (source, sourceMethod, advice) {
-			return aop[adviceType](source, sourceMethod, advice);
+			return meld[adviceType](source, sourceMethod, advice);
 		};
 	}
 
-	function addAfterResolvingAdvice(source, sourceMethod, advice) {
-		return aop.afterReturning(source, sourceMethod, function(promise) {
+	function addAfterFulfillingAdvice(source, sourceMethod, advice) {
+		return meld.afterReturning(source, sourceMethod, function(promise) {
 			return when(promise, advice);
 		});
 	}
 
 	function addAfterRejectingAdvice(source, sourceMethod, advice) {
-		return aop.afterReturning(source, sourceMethod, function(promise) {
+		return meld.afterReturning(source, sourceMethod, function(promise) {
 			return when(promise, null, advice);
 		});
 	}
 
 	function addAfterPromiseAdvice(source, sourceMethod, advice) {
-		return aop.afterReturning(source, sourceMethod, function(promise) {
+		return meld.after(source, sourceMethod, function(promise) {
 			return when(promise, advice, advice);
 		});
 	}
@@ -105,7 +107,7 @@ define(['aop', 'when', './lib/connection'], function(aop, when, connection) {
 			}
 
 			when.chain(when.all(promises), resolver);
-		}
+		};
 	}
 
     //
@@ -210,7 +212,7 @@ define(['aop', 'when', './lib/connection'], function(aop, when, connection) {
              * @param aspect
              */
             function add(target, pointcut, aspect) {
-                woven.push(aop.add(target, pointcut, aspect));
+                woven.push(meld.add(target, pointcut, aspect));
             }
 
             function makeFacet(step, callback) {
@@ -226,10 +228,10 @@ define(['aop', 'when', './lib/connection'], function(aop, when, connection) {
             // Plugin
             plugin = {
                 facets: {
-                    decorate:       makeFacet('configure', decorateFacet),
-					afterResolving: makeFacet(adviceStep, makeAdviceFacet(addAfterResolvingAdvice, woven)),
-					afterRejecting: makeFacet(adviceStep, makeAdviceFacet(addAfterRejectingAdvice, woven)),
-					afterPromise:   makeFacet(adviceStep, makeAdviceFacet(addAfterPromiseAdvice, woven))
+                    decorate:       makeFacet('configure:after', decorateFacet),
+					afterFulfilling: makeFacet(adviceStep, makeAdviceFacet(addAfterFulfillingAdvice, woven)),
+					afterRejecting:  makeFacet(adviceStep, makeAdviceFacet(addAfterRejectingAdvice, woven)),
+					after: makeFacet(adviceStep, makeAdviceFacet(addAfterPromiseAdvice, woven))
                 }
             };
 

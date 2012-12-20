@@ -8,14 +8,18 @@
  * Licensed under the MIT License at:
  * 		http://www.opensource.org/licenses/mit-license.php
  *
+ * @version 0.5.1
  */
 
-define(function () {
+define(['./all'], function (all) {
 
 	var poly = {};
 
-	poly.version = '0.4';
+	// copy all
+	for (var p in all) poly[p] = all[p];
 
-    return poly;
+	poly.version = '0.5.1';
+
+	return poly;
 
 });

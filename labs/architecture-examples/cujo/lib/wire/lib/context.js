@@ -76,8 +76,8 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		inflightRefs = [];
 
 		// Empty parent scope if none provided
-		if(!parent) parent = {};
-		if(!options) options = {};
+		if(!parent) { parent = {}; }
+		if(!options) { options = {}; }
 
 		inheritFromParent(parent, options);
 		createPluginApi();
@@ -207,7 +207,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 			// Plugin API
 			// wire() API that is passed to plugins.
 			pluginApi = function (spec, name, path) {
-				return when(createItem(spec, createPath(name, path)), getResolvedValue);
+				return createItem(spec, createPath(name, path));
 			};
 
 			pluginApi.resolveRef = apiResolveRef;
@@ -273,7 +273,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 			// Once all modules have been loaded, resolve modulesReady
 			whenAll(modulesToLoad, function (modules) {
 				modulesReady.resolve(modules);
-				modulesToLoad = null;
+				modulesToLoad = undef;
 			}, modulesReady.reject);
 		}
 
@@ -296,23 +296,30 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 				var i, len;
 
 				function deleteAll(container) {
-					for(var p in container) delete container[p];
+					for(var p in container) {
+						delete container[p];
+					}
 				}
 
 				deleteAll(components);
 				deleteAll(scope);
 
-				for(i = 0, len = proxiedComponents.length; i < len; i++) {
-					proxiedComponents[i].destroy();
-				}
+				return when.reduce(proxiedComponents, function(p, proxied) {
+					when(p, function() {
+						proxied.destroy();
+					});
+				}, undef)
+				.then(function() {
+					// Free Objects
+					components = scope = parent
+						= resolvers = factories = facets = listeners
+						= wireApi = proxiedComponents = proxiers = plugins
+						= undef;
 
-				// Free Objects
-				components = scope = parent
-					= resolvers = factories = facets = listeners
-					= wireApi = proxiedComponents = proxiers = plugins
-					= undef;
+					return scopeDestroyed;
 
-				return scopeDestroyed;
+				});
+
 			});
 		}
 
@@ -399,14 +406,18 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 
 			} else {
 				// Plain value
-				created = val;
+				created = when.resolve(val);
 			}
 
 			return created;
 		}
 
 		function getModule(moduleId, spec) {
-			var module;
+			var module = defer();
+
+			scanPluginWhenLoaded(isString(moduleId) ? moduleLoader(moduleId) : moduleId, module);
+
+			return module.promise;
 
 			function scanPluginWhenLoaded(loadModulePromise, moduleReadyResolver) {
 
@@ -419,11 +430,6 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 				modulesToLoad && modulesToLoad.push(loadPromise);
 
 			}
-
-			module = defer();
-			scanPluginWhenLoaded(isString(moduleId) ? moduleLoader(moduleId) : moduleId, module);
-
-			return module;
 		}
 
 		function scanPlugin(module, spec) {
@@ -436,6 +442,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 				return when(module.wire$plugin(scopeReady.promise, scopeDestroyed.promise, spec),
 					function(plugin) {
 						plugin && registerPlugin(plugin);
+						return module;
 					}
 				);
 			}
@@ -454,14 +461,14 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		}
 
 		function addProxies(proxiesToAdd) {
-			if (!proxiesToAdd) return;
+			if (!proxiesToAdd) { return; }
 
 			var newProxiers, p, i = 0;
 
 			newProxiers = [];
 			while (p = proxiesToAdd[i++]) {
 				if (proxiers.indexOf(p) < 0) {
-					newProxiers.push(p)
+					newProxiers.push(p);
 				}
 			}
 
@@ -469,7 +476,8 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		}
 
 		function addPlugin(src, registry) {
-			for (var name in src) {
+			var name;
+			for (name in src) {
 				if (registry.hasOwnProperty(name)) {
 					throw new Error("Two plugins for same type in scope: " + name);
 				}
@@ -502,7 +510,9 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 				function (factory) {
 					var component = defer();
 
-					if (!spec.id) spec.id = name;
+					if (!spec.id) {
+						spec.id = name;
+					}
 
 					factory(component.resolver, spec, pluginApi);
 
@@ -659,10 +669,14 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		function doResolveDeepRef(name, scope) {
 			var parts = name.split('.');
 
-			if(parts.length > 2) return when.reject('Only 1 "." is allowed in refs: ' + name);
+			if(parts.length > 2) {
+				return when.reject('Only 1 "." is allowed in refs: ' + name);
+			}
 
-			return when.reduce(parts, function(scope, name) {
-				return name in scope ? scope[name] : when.reject(name);
+			return when.reduce(parts, function(scope, segment) {
+				return segment in scope
+					? scope[segment]
+					: when.reject('Cannot resolve ref: ' + name);
 			}, scope);
 		}
 
@@ -797,7 +811,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		return when.reduce(specs, function(merged, module) {
 			return isString(module)
 				? when(loadModule(module), function(spec) { return safeMixin(merged, spec); })
-				: safeMixin(merged, module)
+				: safeMixin(merged, module);
 		}, {});
 	}
 
@@ -849,9 +863,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 	 * @param val
 	 */
 	function ResolvedValue(val) {
-		this.valueOf = function() {
-			return val;
-		};
+		this.value = val;
 	}
 
 	/**
@@ -860,7 +872,7 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 	 * @param it anything
 	 */
 	function getResolvedValue(it) {
-		return it instanceof ResolvedValue ? it.valueOf() : it;
+		return it instanceof ResolvedValue ? it.value : it;
 	}
 
 	/**
@@ -878,30 +890,36 @@ function(require, when, timeout, array, object, createModuleLoader, Lifecycle, R
 		}, undef);
 	}
 
+	// TODO: Start using this after compatible curl release
+	// TODO: Move to somewhere more logical and modular, like lib/resolver.js
 	function trackInflightRef(refPromise, inflightRefs, refName, onBehalfOf) {
-		var inflight = (onBehalfOf||'?') + ' -> ' + refName;
+		return refPromise;
 
-		inflightRefs.push(inflight);
+		// var inflight = (onBehalfOf||'?') + ' -> ' + refName;
 
-		return timeout(refPromise, 5000).then(
-			function(resolved) {
-				// Successfully resolved, remove from inflight
-				var ref, i = inflightRefs.length;
-				while(ref = inflightRefs[--i]) {
-					if(ref === inflight) {
-						inflightRefs.splice(i, 1);
-						break;
-					}
-				}
+		// inflightRefs.push(inflight);
 
-				return resolved;
-			},
-			function() {
-				// Could not resolve in a reasonable time, warn of possible deadlocked
-				// circular ref
-				return when.reject('Possible circular ref:\n' + inflightRefs.join('\n'));
-			}
-		);
+		// return timeout(refPromise, 1e4).then(
+		// 	function(resolved) {
+		// 		// Successfully resolved, remove from inflight
+		// 		var ref, i = inflightRefs.length;
+		// 		while(ref = inflightRefs[--i]) {
+		// 			if(ref === inflight) {
+		// 				inflightRefs.splice(i, 1);
+		// 				break;
+		// 			}
+		// 		}
+
+		// 		return resolved;
+		// 	},
+		// 	function(e) {
+		// 		// Could not resolve in a reasonable time, warn of possible deadlocked
+		// 		// circular ref
+		// 		return when.reject(e == 'timed out'
+		// 			? ('Possible circular ref:\n' + inflightRefs.join('\n'))
+		// 			: e);
+		// 	}
+		// );
 	}
 
 });

@@ -10,8 +10,8 @@ define({
 	// Render and insert the create view
 	createView: {
 		render: {
-			template: { module: 'text!create/template.html' },
-			replace: { module: 'i18n!create/strings' }
+			template: { module: 'text!app/create/template.html' },
+			replace: { module: 'i18n!app/create/strings' }
 		},
 		insert: { first: 'root' }
 	},
@@ -26,9 +26,9 @@ define({
 	// data and mapping data fields to the DOM
 	listView: {
 		render: {
-			template: { module: 'text!list/template.html' },
-			replace: { module: 'i18n!list/strings' },
-			css: { module: 'css!list/structure.css' }
+			template: { module: 'text!app/list/template.html' },
+			replace: { module: 'i18n!app/list/strings' },
+			css: { module: 'css!app/list/structure.css' }
 		},
 		insert: { after: 'createView' },
 		bind: {
@@ -38,7 +38,7 @@ define({
 				text: 'label, .edit',
 				complete: [
 					'.toggle',
-					{ attr: 'classList', handler: { module: 'list/setCompletedClass' } }
+					{ attr: 'classList', handler: { module: 'app/list/setCompletedClass' } }
 				]
 			}
 		}
@@ -48,9 +48,9 @@ define({
 	// filters, and clear completed button.
 	controlsView: {
 		render: {
-			template: { module: 'text!controls/template.html' },
-			replace: { module: 'i18n!controls/strings' },
-			css: { module: 'css!controls/structure.css' }
+			template: { module: 'text!app/controls/template.html' },
+			replace: { module: 'i18n!app/controls/strings' },
+			css: { module: 'css!app/controls/structure.css' }
 		},
 		insert: { after: 'listView' }
 	},
@@ -59,8 +59,8 @@ define({
 	// is still fully internationalized.
 	footerView: {
 		render: {
-			template: { module: 'text!footer/template.html' },
-			replace: { module: 'i18n!footer/strings' }
+			template: { module: 'text!app/footer/template.html' },
+			replace: { module: 'i18n!app/footer/strings' }
 		},
 		insert: { after: 'root' }
 	},
@@ -84,7 +84,7 @@ define({
 			module: 'cola/Collection',
 			args: {
 				strategyOptions: {
-					validator: { module: 'create/validateTodo' }
+					validator: { module: 'app/create/validateTodo' }
 				}
 			}
 		},
@@ -100,7 +100,7 @@ define({
 	// view controllers. Since this is a relatively simple application,
 	// a single controller fits well.
 	todoController: {
-		prototype: { create: 'controller' },
+		prototype: { create: 'app/controller' },
 		properties: {
 			todos: { $ref: 'todos' },
 
@@ -140,8 +140,8 @@ define({
 	},
 
 	form: { module: 'cola/dom/form' },
-	cleanTodo: { module: 'create/cleanTodo' },
-	generateMetadata: { module: 'create/generateMetadata' },
+	cleanTodo: { module: 'app/create/cleanTodo' },
+	generateMetadata: { module: 'app/create/generateMetadata' },
 
 	toggleEditingState: {
 		create: {

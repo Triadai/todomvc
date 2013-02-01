@@ -156,7 +156,7 @@ define(function () {
 		 *  - if value is a promise, will fulfill with its value, or reject
 		 *    with its reason.
 		 */
-		yield: function(value) {
+		'yield': function(value) {
 			return this.then(function() {
 				return value;
 			});
@@ -165,7 +165,7 @@ define(function () {
 		/**
 		 * Assumes that this promise will fulfill with an array, and arranges
 		 * for the onFulfilled to be called with the array as its argument list
-		 * i.e. onFulfilled.spread(undefined, array).
+		 * i.e. onFulfilled.apply(undefined, array).
 		 * @param {function} onFulfilled function to receive spread arguments
 		 * @return {Promise}
 		 */
@@ -188,11 +188,10 @@ define(function () {
 	 */
 	function fulfilled(value) {
 		var p = new Promise(function(onFulfilled) {
-			// TODO: Promises/A+ check typeof onFulfilled
 			try {
-				return resolve(onFulfilled ? onFulfilled(value) : value);
+				return resolve(typeof onFulfilled == 'function' ? onFulfilled(value) : value);
 			} catch(e) {
-				return rejected(e);
+				return reject(e);
 			}
 		});
 
@@ -209,11 +208,10 @@ define(function () {
 	 */
 	function rejected(reason) {
 		var p = new Promise(function(_, onRejected) {
-			// TODO: Promises/A+ check typeof onRejected
 			try {
-				return onRejected ? resolve(onRejected(reason)) : rejected(reason);
+				return resolve(typeof onRejected == 'function' ? onRejected(reason) : rejected(reason));
 			} catch(e) {
-				return rejected(e);
+				return reject(e);
 			}
 		});
 
@@ -273,7 +271,6 @@ define(function () {
 		 * @param {function?} [onProgress] progress handler
 		 */
 		_then = function(onFulfilled, onRejected, onProgress) {
-			// TODO: Promises/A+ check typeof onFulfilled, onRejected, onProgress
 			var deferred, progressHandler;
 
 			deferred = defer();
@@ -317,14 +314,12 @@ define(function () {
 		 * @param {*} value the value of this deferred
 		 */
 		_resolve = function(value) {
-			value = resolve(value);
-
 			// Replace _then with one that directly notifies with the result.
 			_then = value.then;
 			// Replace _resolve so that this Deferred can only be resolved once
 			_resolve = resolve;
 			// Make _progress a noop, to disallow progress for the resolved promise.
-			_progress = noop;
+			_progress = identity;
 
 			// Notify handlers
 			processQueue(handlers, value);
@@ -353,7 +348,7 @@ define(function () {
 		 * Wrapper to allow _resolve to be replaced
 		 */
 		function promiseResolve(val) {
-			return _resolve(val);
+			return _resolve(resolve(val));
 		}
 
 		/**
@@ -451,7 +446,7 @@ define(function () {
 				}
 			}
 
-			return deferred.then(onFulfilled, onRejected, onProgress);
+			return deferred.promise.then(onFulfilled, onRejected, onProgress);
 
 			function rejecter(reason) {
 				rejectOne(reason);

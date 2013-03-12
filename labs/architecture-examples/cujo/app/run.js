@@ -1,21 +1,22 @@
 (function( curl ) {
 
 	var config = {
-		baseUrl: 'app',
 		paths: {
-			theme: '../theme',
-			curl: '../lib/curl/src/curl'
+			curl: 'lib/curl/src/curl',
+			jquery: 'lib/jquery-1.9.1',
+			underscore: 'lib/underscore'
 		},
-		pluginPath: 'curl/plugin',
 		packages: [
-			{ name: 'wire', location: '../lib/wire', main: 'wire' },
-			{ name: 'when', location: '../lib/when', main: 'when' },
-			{ name: 'meld', location: '../lib/meld',  main: 'meld' },
-			{ name: 'cola', location: '../lib/cola', main: 'cola' },
-			{ name: 'poly', location: '../lib/poly', main: 'poly' }
-		]
+			{ name: 'wire', location: 'lib/wire', main: 'wire' },
+			{ name: 'when', location: 'lib/when', main: 'when' },
+			{ name: 'meld', location: 'lib/meld', main: 'meld' },
+			{ name: 'cola', location: 'lib/cola', main: 'cola' },
+			{ name: 'poly', location: 'lib/poly', main: 'poly' },
+			{ name: 'backbone', location: 'lib/backbone', main: 'backbone' }
+		],
+		preloads: ['poly/es5', 'jquery', 'underscore']
 	};
 
-	curl(config, ['poly/string', 'poly/array', 'poly/function']).next(['wire!main']);
+	curl(config, ['wire!app/main']);
 
 })( curl );

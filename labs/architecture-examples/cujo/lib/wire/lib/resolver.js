@@ -5,47 +5,100 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-(function(define){
-define(['when'], function(when) {
+(function(define){ 'use strict';
+define(function(require) {
 
-	'use strict';
+	var when, timeout, object, DirectedGraph, trackInflightRef;
 
+	when = require('when');
+	timeout = require('when/timeout');
+	object = require('./object');
+	DirectedGraph = require('./graph/DirectedGraph');
+	trackInflightRef = require('./graph/trackInflightRef');
+
+	/**
+	 * Create a reference resolve that uses the supplied plugins and pluginApi
+	 * @param {object} config
+	 * @param {object} config.plugins plugin registry
+	 * @param {object} config.pluginApi plugin Api to provide to resolver plugins
+	 *  when resolving references
+	 * @constructor
+	 */
 	function Resolver(config) {
-		this._resolvers = config.resolvers;
+		this._resolvers = config.plugins.resolvers;
 		this._pluginApi = config.pluginApi;
+
+		// Directed graph to track reference cycles
+		// Should be injected, but for now, we'll just create it here
+		// TODO: Hoist to config or another constructor arg
+		this._trackInflightRef = trackInflightRef.bind(null, new DirectedGraph());
 	}
 
 	Resolver.prototype = {
 
+		/**
+		 * Determine if it is a reference spec that can be resolved by this resolver
+		 * @param {*} it
+		 * @return {boolean} true iff it is a reference
+		 */
 		isRef: function(it) {
-			return it && it.hasOwnProperty('$ref');
+			return it && object.hasOwn(it, '$ref');
 		},
 
+		/**
+		 * Parse it, which must be a reference spec, into a reference object
+		 * @param {object|string} it
+		 * @param {string?} it.$ref
+		 * @return {object} reference object
+		 */
 		parse: function(it) {
-			return this.create(it.$ref, it);
+			return this.isRef(it)
+				? this.create(it.$ref, it)
+				: this.create(it, {});
 		},
 
+		/**
+		 * Creates a reference object
+		 * @param {string} name reference name
+		 * @param {object} options
+		 * @return {{resolver: String, name: String, options: object, resolve: Function}}
+		 */
 		create: function(name, options) {
-			var self, split, resolver;
+			var self, split, resolver, trackRef;
 
 			self = this;
 
 			split = name.indexOf('!');
 			resolver = name.substring(0, split);
 			name = name.substring(split + 1);
+			trackRef = this._trackInflightRef;
 
 			return {
 				resolver: resolver,
 				name: name,
 				options: options,
-				resolve: function() {
-					return self._resolve(resolver, name, options);
+				resolve: function(fallback, onBehalfOf) {
+					var ref = this.resolver
+						? self._resolve(resolver, name, options, onBehalfOf)
+						: fallback(name, options);
+
+					return trackRef(ref, name, onBehalfOf);
 				}
 			};
 		},
 
-		_resolve: function(resolverName, name, options) {
-			var deferred, resolver;
+		/**
+		 * Do the work of resolving a reference using registered plugins
+		 * @param {string} resolverName plugin resolver name (e.g. "dom"), the part before the "!"
+		 * @param {string} name reference name, the part after the "!"
+		 * @param {object} options additional options to pass thru to a resolver plugin
+		 * @param {string|*} onBehalfOf some indication of another component on whose behalf this
+		 *  reference is being resolved.  Used to build a reference graph and detect cycles
+		 * @return {object} promise for the resolved reference
+		 * @private
+		 */
+		_resolve: function(resolverName, name, options, onBehalfOf) {
+			var deferred, resolver, api;
 
 			deferred = when.defer();
 
@@ -53,13 +106,14 @@ define(['when'], function(when) {
 				resolver = this._resolvers[resolverName];
 
 				if (resolver) {
-					resolver(deferred.resolver, name, options||{}, this._pluginApi);
+					api = this._pluginApi.contextualize(onBehalfOf);
+					resolver(deferred.resolver, name, options||{}, api);
 				} else {
-					deferred.reject('No resolver plugin found: ' + resolverName);
+					deferred.reject(new Error('No resolver plugin found: ' + resolverName));
 				}
 
 			} else {
-				deferred.reject('Cannot resolve ref: ' + name);
+				deferred.reject(new Error('Cannot resolve ref: ' + name));
 			}
 
 			return deferred.promise;
@@ -73,9 +127,5 @@ define(['when'], function(when) {
 	// AMD
 	? define
 	// CommonJS
-	: function(deps, factory) {
-		module.exports = factory.apply(this, deps.map(function(x) {
-			return require(x);
-		}));
-	}
+	: function(factory) { module.exports = factory(require); }
 );

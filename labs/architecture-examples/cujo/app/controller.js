@@ -1,7 +1,11 @@
-define(function () {
+define(function (require) {
 	"use strict";
 
-	var updateRemainingCount, textProp;
+	var when, meld, updateRemainingCount, textProp, completeHandler;
+
+	when = require('when');
+	meld = require('meld');
+	completeHandler = require('./list/setCompletedClass');
 
 	updateRemainingCount = normalizeTextProp;
 
@@ -12,7 +16,19 @@ define(function () {
 		 * @param todo {Object} data used to create new todo
 		 * @param todo.text {String} text of the todo
 		 */
-		createTodo: function(todo) {},
+		createTodo: function(todo) {
+			// This is ugly
+			// TODO: Use collection-level binding
+			return when(this._createTodoView({ todo: { literal: todo } }),
+				function(context) {
+					todo.on('destroy', context.destroy);
+				}
+			);
+		},
+
+		createTodos: function(todos) {
+			return when.all(todos.map(this.createTodo.bind(this)));
+		},
 
 		/**
 		 * Remove an existing todo

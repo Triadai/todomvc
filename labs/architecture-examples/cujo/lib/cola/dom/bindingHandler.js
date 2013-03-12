@@ -69,8 +69,8 @@ define(function (require) {
 	 *   for a given binding. it is assumed that the binding has been
 	 *   normalized. function (binding, prop) { return handler; }
 	 */
-	return function configureHandlerCreator (rootNode, options) {
-		var nodeFinder, eventBinder;
+	return function configureHandlerCreator (options, rootNode) {
+		var nodeFinder, eventBinder, bindings, binders;
 
 		nodeFinder = options.nodeFinder || options.querySelectorAll || options.querySelector;
 		eventBinder = options.on;
@@ -79,7 +79,22 @@ define(function (require) {
 
 		nodeFinder = createSafeNodeFinder(nodeFinder);
 
-		return function createBindingHandler (binding, prop) {
+		bindings = options.bindings;
+		binders = Object.keys(options.bindings).reduce(function(binders, name) {
+			binders[name] = createBindingHandler(bindings[name], name);
+			return binders;
+		}, {});
+
+		return function(item) {
+			Object.keys(item).forEach(function(key) {
+				var binder = binders[key];
+				if(binder) {
+					binder(item);
+				}
+			});
+		}
+
+		function createBindingHandler (binding, prop) {
 			var bindingsAsArray, unlisteners, currItem;
 
 			bindingsAsArray = normalizeBindings(binding, prop);
@@ -107,6 +122,8 @@ define(function (require) {
 					});
 
 				});
+
+				return item;
 
 			}
 
@@ -156,7 +173,12 @@ define(function (require) {
 				norm = Object.create(binding);
 			}
 
-			norm.each = binding.each || binding.handler || defaultNodeHandler;
+			if(typeof binding == 'function') {
+				norm.each = binding;
+			} else {
+				norm.each = binding.each || binding.handler || defaultNodeHandler;
+			}
+
 			if (!norm.prop) norm.prop = defaultProp;
 			return norm;
 		});

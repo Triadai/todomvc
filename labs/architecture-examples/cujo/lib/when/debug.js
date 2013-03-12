@@ -136,7 +136,7 @@ define(['./when'], function(when) {
 	 * @return {Deferred} a Deferred with debug logging
 	 */
 	function deferDebug(/* id */) {
-		var d, status, value, origResolve, origReject, origProgress, origThen, id;
+		var d, status, value, origResolve, origReject, origNotify, origThen, origAlways, id;
 
 		// Delegate to create a Deferred;
 		d = when.defer();
@@ -158,17 +158,20 @@ define(['./when'], function(when) {
 		d.id = id;
 		d.promise = debugPromise(d.promise, d);
 
+		origAlways = d.promise.always;
+		d.promise.always = deprecated('promise.always', 'promise.ensure', origAlways, d.promise);
+
 		d.resolver = beget(d.resolver);
 		d.resolver.toString = function() {
 			return toString('Resolver', id, status, value);
 		};
 
-		origProgress = d.resolver.progress;
-		d.progress = d.resolver.progress = function(update) {
+		origNotify = d.resolver.notify;
+		d.notify = d.resolver.notify = function(update) {
 			// Notify global debug handler, if set
 			callGlobalHandler('progress', d, update);
 
-			return origProgress(update);
+			return origNotify(update);
 		};
 
 		origResolve = d.resolver.resolve;
@@ -198,8 +201,6 @@ define(['./when'], function(when) {
 			function(v) { status = 'resolved'; return v; },
 			function(e) { status = 'REJECTED'; return when.reject(e); }
 		);
-
-		d.then = deprecated('deferred.then', 'deferred.promise.then', d.promise.then, d);
 
 		// Add an id to all directly created promises.  It'd be great
 		// to find a way to propagate this id to promise created by .then()
@@ -308,6 +309,7 @@ define(['./when'], function(when) {
 		}, 0);
 	}
 
+	// Commented out until we need it, to appease JSHint
 	function deprecated(name, preferred, f, context) {
 		return function() {
 			warn(new Error(name + ' is deprecated, use ' + preferred).stack);
@@ -343,9 +345,9 @@ define(['./when'], function(when) {
 });
 })(typeof define == 'function'
 	? define
-	: function (deps, factory) { typeof module != 'undefined'
+	: function (deps, factory) { typeof exports != 'undefined'
 		? (module.exports = factory(require('./when')))
-		: (this.when      = factory(this.when));
+		: (this.when = factory(this.when));
 	}
 	// Boilerplate for AMD, Node, and browser global
 );

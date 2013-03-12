@@ -25,8 +25,9 @@ myObject.doSomething(1, 2); // Nothing logged
 
 # Docs
 
-* [API](meld/blob/master/docs/api.md)
-* [Reference](meld/blob/master/docs/reference.md)
+* [API](docs/api.md)
+* [Reference](docs/reference.md)
+* [Aspects](docs/aspects.md)
 
 # Quick Start
 
@@ -72,6 +73,14 @@ Run unit tests in Node:
 
 # Changelog
 
+### 1.2.0
+
+* `meld.joinpoint()` - [Access the current joinpoint](docs/api.md#meldjoinpoint) from any advice type.
+* [Bundled aspects](docs/aspects.md):
+	* trace: trace method call entry/return/throw
+	* memoize: simple memoization for methods and functions
+	* cache: configurable caching aspect to do more than simple memoization
+
 ### 1.1.0
 
 * Advice can be applied directly to methods on a function.
@@ -85,7 +94,7 @@ Run unit tests in Node:
 ### 0.8.0
 
 * 1.0.0 Release Candidate 1
-* Documentation! Check out the new [reference](meld/blob/master/docs/reference.md) and [api](meld/blob/master/docs/api.md) docs.
+* Documentation! Check out the new [reference](docs/reference.md) and [api](docs/api.md) docs.
 * **Deprecated browser global** - meld.js will drop support for browser global for 1.0.0 and will support modular environments only.
 
 ### 0.7.2

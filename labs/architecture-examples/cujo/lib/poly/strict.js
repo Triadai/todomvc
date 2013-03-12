@@ -8,6 +8,9 @@
 	Licensed under the MIT License at:
 		http://www.opensource.org/licenses/mit-license.php
 */
+/**
+ * @deprecated Please use poly/es5-strict
+ */
 define(['./object', './string', './date', './array', './function', './json', './xhr'], function (object, string, date) {
 
 	var failTestRx;

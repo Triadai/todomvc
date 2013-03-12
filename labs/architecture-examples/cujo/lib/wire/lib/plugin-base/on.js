@@ -154,7 +154,7 @@ function (when, apply, functional, connection) {
 					facets: {
 						on: {
 							connect: function (resolver, facet, wire) {
-								when.chain(onFacet(wire, facet), resolver);
+								resolver.resolve(onFacet(wire, facet));
 							}
 						}
 					},
@@ -256,7 +256,7 @@ function (when, apply, functional, connection) {
 		return function (e) {
 			preventer(e);
 			stopper(e);
-			return handler(e);
+			return handler.apply(this, arguments);
 		};
 	}
 

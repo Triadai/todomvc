@@ -10,8 +10,8 @@ define({
 	// Render and insert the create view
 	createView: {
 		render: {
-			template: { module: 'text!create/template.html' },
-			replace: { module: 'i18n!create/strings' }
+			template: { module: 'text!app/create/template.html' },
+			replace: { module: 'i18n!app/create/strings' }
 		},
 		insert: { first: 'root' }
 	},
@@ -19,38 +19,27 @@ define({
 	// Hook up the form to auto-reset whenever a new todo is added
 	createForm: {
 		element: { $ref: 'dom.first!form', at: 'createView' },
-		connect: { 'todos.onAdd': 'reset' }
+		afterReturning: { 'todos.add': 'reset' }
 	},
 
 	// Render and insert the list of todos, linking it to the
 	// data and mapping data fields to the DOM
 	listView: {
 		render: {
-			template: { module: 'text!list/template.html' },
-			replace: { module: 'i18n!list/strings' },
-			css: { module: 'css!list/structure.css' }
+			template: { module: 'text!app/list/template.html' },
+			replace: { module: 'i18n!app/list/strings' },
+			css: { module: 'css!app/list/structure.css' }
 		},
-		insert: { after: 'createView' },
-		bind: {
-			to: { $ref: 'todos' },
-			comparator: 'dateCreated',
-			bindings: {
-				text: 'label, .edit',
-				complete: [
-					'.toggle',
-					{ attr: 'classList', handler: { module: 'list/setCompletedClass' } }
-				]
-			}
-		}
+		insert: { after: 'createView' }
 	},
 
 	// Render and insert the "controls" view--this has the todo count,
 	// filters, and clear completed button.
 	controlsView: {
 		render: {
-			template: { module: 'text!controls/template.html' },
-			replace: { module: 'i18n!controls/strings' },
-			css: { module: 'css!controls/structure.css' }
+			template: { module: 'text!app/controls/template.html' },
+			replace: { module: 'i18n!app/controls/strings' },
+			css: { module: 'css!app/controls/structure.css' }
 		},
 		insert: { after: 'listView' }
 	},
@@ -59,38 +48,27 @@ define({
 	// is still fully internationalized.
 	footerView: {
 		render: {
-			template: { module: 'text!footer/template.html' },
-			replace: { module: 'i18n!footer/strings' }
+			template: { module: 'text!app/footer/template.html' },
+			replace: { module: 'i18n!app/footer/strings' }
 		},
 		insert: { after: 'root' }
 	},
 
-	// Create a localStorage adapter that will use the storage
-	// key 'todos-cujo' for storing todos.  This is also linked,
-	// creating a two-way linkage between the listView and the
-	// data storage.
-	todoStore: {
-		create: {
-			module: 'cola/adapter/LocalStorage',
-			args: 'todos-cujo'
-		},
-		bind: {
-			to: { $ref: 'todos' }
-		}
-	},
-
+	// Create a Todos backbone collection
 	todos: {
-		create: {
-			module: 'cola/Collection',
-			args: {
-				strategyOptions: {
-					validator: { module: 'create/validateTodo' }
+		create: 'app/Todos',
+		properties: {
+			model: { module: 'app/Todo' },
+			// DI at work. The Todos collection should NOT be hardcoded
+			// with a particular storage type.  We should be able to configure
+			// them to be stored wherever we want.  DI allows us to create and
+			// inject a LocalStorage adapter externally.
+			localStorage: {
+				create: {
+					module: 'backbone/LocalStorage',
+					args: 'todos-cujo-backbone'
 				}
 			}
-		},
-		before: {
-			add: 'cleanTodo | generateMetadata',
-			update: 'cleanTodo'
 		}
 	},
 
@@ -100,48 +78,36 @@ define({
 	// view controllers. Since this is a relatively simple application,
 	// a single controller fits well.
 	todoController: {
-		prototype: { create: 'controller' },
+		create: 'app/controller',
 		properties: {
-			todos: { $ref: 'todos' },
-
-			createTodo: { compose: 'form.getValues | todos.add' },
-			removeTodo: { compose: 'todos.remove' },
-			updateTodo: { compose: 'todos.update' },
-
-			querySelector: { $ref: 'dom.first!' },
-
-			masterCheckbox: { $ref: 'dom.first!#toggle-all', at: 'listView' },
-			countNode: { $ref: 'dom.first!.count', at: 'controlsView' },
-			remainingNodes: { $ref: 'dom.all!#todo-count strong', at: 'controlsView' }
+			_createTodoView: { $ref: 'createTodoView' },
+			ready: { compose: 'todos.fetch' }
 		},
 		on: {
 			createView: {
-				'submit:form': 'createTodo'
-			},
-			listView: {
-				'click:.destroy': 'removeTodo',
-				'change:.toggle': 'updateTodo',
-				'click:#toggle-all': 'toggleAll',
-				'dblclick:.view': 'todos.edit',
-				'change,focusout:.edit': 'todos.submit' // also need way to submit on [enter]
-			},
-			controlsView: {
-				'click:#clear-completed': 'removeCompleted'
+				'submit:form': 'form.getValues | cleanTodo | todos.create'
 			}
 		},
-		connect: {
-			updateTotalCount: 'setTodosTotalState',
-			updateRemainingCount: 'setTodosRemainingState',
-			updateCompletedCount: 'setTodosCompletedState',
-			'todos.onChange': 'updateCount',
-			'todos.onEdit': 'todos.findNode | toggleEditingState.add | beginEditTodo',
-			'todos.onSubmit': 'todos.findNode | toggleEditingState.remove | todos.findItem | endEditTodo'
+		afterFulfilling: {
+			'todos.create': 'createTodo',
+			'todos.reset': 'createTodos'
+		},
+		ready: 'ready'
+	},
+
+	createTodoView: {
+		wire: {
+			spec: 'app/todo/spec',
+			defer: true,
+			provide: {
+				container: { $ref: 'dom.first!#todo-list', at: 'listView' }
+			}
 		}
 	},
 
 	form: { module: 'cola/dom/form' },
-	cleanTodo: { module: 'create/cleanTodo' },
-	generateMetadata: { module: 'create/generateMetadata' },
+	cleanTodo: { module: 'app/create/cleanTodo' },
+	generateMetadata: { module: 'app/create/generateMetadata' },
 
 	toggleEditingState: {
 		create: {
@@ -174,12 +140,12 @@ define({
 	},
 
 	plugins: [
-		{ module: 'wire/debug', trace: true },
-		{ module: 'wire/dom' },
+		{ module: 'backbone/binder' },
+		{ module: 'wire/debug' },
+		{ module: 'wire/jquery/dom' },
 		{ module: 'wire/dom/render' },
-		{ module: 'wire/on' },
-		{ module: 'wire/aop' },
+		{ module: 'wire/jquery/on' },
 		{ module: 'wire/connect' },
-		{ module: 'cola' }
+		{ module: 'wire/aop' }
 	]
 });

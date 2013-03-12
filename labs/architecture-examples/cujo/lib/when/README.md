@@ -1,45 +1,33 @@
-# when.js [![Build Status](https://secure.travis-ci.org/cujojs/when.png)](http://travis-ci.org/cujojs/when)
+<a href="http://promises-aplus.github.com/promises-spec"><img src="http://promises-aplus.github.com/promises-spec/assets/logo-small.png" alt="Promises/A+ logo" align="right" /></a>
 
-When.js is cujojs's lightweight [CommonJS](http://wiki.commonjs.org/wiki/Promises) [Promises/A](http://wiki.commonjs.org/wiki/Promises/A) and `when()` implementation, derived from the async core of [wire.js](https://github.com/cujojs/wire), cujojs's IOC Container.  It also provides several other useful Promise-related concepts, such as joining multiple promises, mapping and reducing collections of promises, timed promises, and has a robust [unit test suite](#running-the-unit-tests).
+[![Build Status](https://secure.travis-ci.org/cujojs/when.png)](http://travis-ci.org/cujojs/when) 
 
-It passes the [Promises/A Test Suite](https://github.com/domenic/promise-tests), is [frighteningly fast](https://github.com/cujojs/promise-perf-tests#test-results), and is **under 1.3k** when compiled with Google Closure (w/advanced optimizations) and gzipped, and has no dependencies.
+# when.js
+
+When.js is cujojs's lightweight [Promises/A+](http://promises-aplus.github.com/promises-spec) and `when()` implementation, derived from the async core of [wire.js](https://github.com/cujojs/wire), cujojs's IOC Container.  It features:
+
+* A rock solid, battle-tested Promise implementation
+* Resolving, mapping, and reducing arrays of promises
+* Executing tasks in parallel and sequence
+* Transforming Node-style and other callback-based APIs into promise-based APIs
+
+It passes the [Promises/A+ Test Suite](https://github.com/promises-aplus/promises-tests), is [very fast](https://github.com/cujojs/promise-perf-tests#test-results), and is **around 1.4k** when compiled with Google Closure + gzip, and has no external dependencies.
 
 # What's New?
 
-### 1.7.1
+### 2.0.0
 
-* Removed leftover internal usages of `deferred.then`.
-* [when/debug](https://github.com/cujojs/when/wiki/when-debug) allows configuring the set of "fatal" error types that will be rethrown to the host env.
+* Fully asynchronous resolutions.
+* [Promises/A+](http://promises-aplus.github.com/promises-spec) compliance.
+* New [`when/keys`](docs/api.md#object-keys) module with `all()` and `map()` for object keys/values.
+* New [`promise.ensure`](docs/api.md#ensure) as a better, and safer, replacement for `promise.always`.  [See discussion](https://github.com/cujojs/when/issues/103).
+* **DEPRECATED:** `promise.always`.  [See discussion](https://github.com/cujojs/when/issues/103) as to why it makes for easy mistakes.
 
-### 1.7.0
-
-* **DEPRECATED:** `deferred.then` [is deprecated](when/blob/master/docs/api.md#deferred) and will be removed in an upcoming release.  Use `deferred.promise.then` instead.
-* [promise.yield](when/blob/master/docs/api.md#yield)(promiseOrValue) convenience API for substituting a new value into a promise chain.
-* [promise.spread](when/blob/master/docs/api.md#spread)(variadicFunction) convenience API for spreading an array onto a fulfill handler that accepts variadic arguments. [Mmmm, buttery](http://s.shld.net/is/image/Sears/033W048977110001_20100422100331516?hei=1600&wid=1600&op_sharpen=1&resMode=sharp&op_usm=0.9,0.5,0,0)
-* Doc improvements:
-	* [when()](when/blob/master/docs/api.md#when) and [promise.then()](when/blob/master/docs/api.md#main-promise-api) have more info about callbacks and chaining behavior.
-	* More info and clarifications about the roles of [Deferred](when/blob/master/docs/api.md#deferred) and [Resolver](when/blob/master/docs/api.md#resolver)
-	* Several minor clarifications for various APIs
-* Internal improvements to assimilation and interoperability with other promise implementations.
-
-### 1.6.1
-
-* Fix for accidental coercion of non-promises. See [#62](https://github.com/cujojs/when/issues/60).
-
-### 1.6.0
-
-* New [when.join](when/blob/master/docs/api.md#whenjoin) - Joins 2 or more promises together into a single promise.
-* [when.some](when/blob/master/docs/api.md#whensome) and [when.any](when/blob/master/docs/api.md#whenany) now act like competitive races, and have generally more useful behavior.  [Read the discussion in #60](https://github.com/cujojs/when/issues/60).
-* *Experimental* progress event propagation.  Progress events will propagate through promise chains. [Read the details here](when/blob/master/docs/api.md#progress-events).
-* *Temporarily* removed calls to `Object.freeze`. Promises are no longer frozen due to a horrendous v8 performance penalty.  [Read discussion here](https://groups.google.com/d/topic/cujojs/w_olYqorbsY/discussion).
-	* **IMPORTANT:** Continue to treat promises as if they are frozen, since `freeze()` will be reintroduced once v8 performance improves.
-* [when/debug](https://github.com/cujojs/when/wiki/when-debug) now allows setting global a debugging callback for rejected promises.
-
-[Full Changelog](https://github.com/cujojs/when/wiki/Changelog)
+[Full Changelog](CHANGES.md)
 
 # Docs & Examples
 
-[API docs](when/blob/master/docs/api.md#api)
+[API docs](docs/api.md#api)
 
 [More info on the wiki](https://github.com/cujojs/when/wiki)
 
@@ -53,7 +41,7 @@ Quick Start
 1. `git clone https://github.com/cujojs/when` or `git submodule add https://github.com/cujojs/when`
 1. Configure your loader with a package:
 
-	```javascript
+	```js
 	packages: [
 		{ name: 'when', location: 'path/to/when/', main: 'when' },
 		// ... other packages ...
@@ -97,6 +85,6 @@ Note that when.js includes @domenic's [Promises/A Test Suite](https://github.com
 References
 ----------
 
-Much of this code was inspired by @[unscriptable](https://github.com/unscriptable)'s [tiny promises](https://github.com/unscriptable/promises), the async innards of [wire.js](https://github.com/cujojs/wire), and some gists [here](https://gist.github.com/870729), [here](https://gist.github.com/892345), [here](https://gist.github.com/894356), and [here](https://gist.github.com/894360)
+Much of this code was inspired by @[unscriptable](https://github.com/unscriptable)'s [tiny promises](https://github.com/unscriptable/promises), the async innards of [wire.js](https://github.com/cujojs/wire), and some gists [here](https://gist.github.com/870729), [here](https://gist.github.com/892345), [here](https://gist.github.com/894356), and [here](https://gist.github.com/894360).
 
 Some of the code has been influenced by the great work in [Q](https://github.com/kriskowal/q), [Dojo's Deferred](https://github.com/dojo/dojo), and [uber.js](https://github.com/phiggins42/uber.js).
